@@ -8,10 +8,11 @@ const mode = document.querySelector('#mode');
 const horizon = document.querySelector('#horizon');
 const horizonValue = document.querySelector('#horizon-value');
 const pulseButton = document.querySelector('#pulse');
+const liveButton = document.querySelector('#live');
 const summary = document.querySelector('#summary');
 const skyStatus = document.querySelector('#sky-status');
 const esc = value => String(value).replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;' }[char]));
-const state = { report: null, graph: null, selected: null, pulse: false, phase: 0, nodes: [] };
+const state = { report: null, graph: null, selected: null, pulse: false, live: false, phase: 0, nodes: [], liveTimer: null };
 
 function visibleRepos() {
   const query = search.value.trim().toLowerCase();
@@ -78,7 +79,7 @@ function draw() {
   });
   const stats = reportStats(state.report, Number(horizon.value));
   summary.textContent = `${repos.length} of ${stats.worlds} worlds · ${stats.bridges} bridges · average signal ${stats.average}`;
-  skyStatus.textContent = `${stats.bright} bright worlds · ${stats.languages} language families · ${weatherWord(repos[0] ?? { health: 0 }, Number(horizon.value))} horizon`;
+  skyStatus.textContent = `${stats.bright} bright worlds · ${stats.languages} language families · ${weatherWord(repos[0] ?? { health: 0 }, Number(horizon.value))} horizon${state.live ? ' · live' : ''}`;
   horizonValue.textContent = Number(horizon.value) === 0 ? 'now' : `${horizon.value}d ago`;
 }
 
@@ -117,11 +118,30 @@ async function init() {
   requestAnimationFrame(animate);
 }
 
+async function refreshLive() {
+  if (!state.live) return;
+  try {
+    const fresh = await fetch(`/api/report?live=${Date.now()}`, { cache: 'no-store' }).then(response => response.json());
+    if (fresh.generatedAt === state.report.generatedAt) return;
+    state.report = fresh;
+    if (state.selected) state.selected = fresh.repos.find(repo => repo.id === state.selected.id) ?? null;
+    draw();
+  } catch { skyStatus.textContent = 'live link lost · retrying'; }
+}
+
 search.oninput = draw;
 health.onchange = draw;
 mode.onchange = () => { document.body.dataset.mode = mode.value; draw(); };
 horizon.oninput = draw;
 pulseButton.onclick = () => { state.pulse = !state.pulse; pulseButton.classList.toggle('active', state.pulse); pulseButton.textContent = state.pulse ? 'pulse / on' : 'pulse / off'; };
+liveButton.onclick = () => {
+  state.live = !state.live;
+  liveButton.classList.toggle('active', state.live);
+  liveButton.textContent = state.live ? 'live / on' : 'live / off';
+  if (state.live && !state.liveTimer) state.liveTimer = setInterval(refreshLive, 15000);
+  if (!state.live && state.liveTimer) { clearInterval(state.liveTimer); state.liveTimer = null; }
+  draw();
+};
 document.querySelector('#focus').onclick = () => document.body.classList.toggle('focus');
 document.onkeydown = event => {
   if (event.key === '/' && document.activeElement !== search) { event.preventDefault(); search.focus(); }

@@ -41,6 +41,23 @@ async function serve(reportFile, port, host) {
   server.listen(Number(port), host, () => console.log(`Orbitarium is orbiting at http://${host}:${port}`));
 }
 
+async function watchReport(reportFile, root, interval) {
+  let busy = false;
+  const refresh = async () => {
+    if (busy) return;
+    busy = true;
+    try {
+      const report = await createReport(root);
+      await fs.mkdir(path.dirname(reportFile), { recursive: true });
+      await fs.writeFile(reportFile, json(report));
+      console.log(`Orbitarium refreshed ${report.repos.length} worlds`);
+    } catch (error) { console.error(`Orbitarium refresh failed: ${error.message}`); }
+    finally { busy = false; }
+  };
+  await refresh();
+  setInterval(refresh, Math.max(5000, Number(interval) || 30000));
+}
+
 if (command === 'demo') {
   const demo = { schema: 'orbitarium/v1', generatedAt: new Date().toISOString(), root: 'demo universe', repos: [
     { id:'aurora', name:'aurora', relativePath:'aurora', branch:'main', commitCount:87, lastCommitDays:2, fileCount:142, bytes:620000, languages:[{name:'TypeScript',files:74},{name:'CSS',files:22}], manifests:['Node'],hasReadme:true,health:95 },
@@ -52,7 +69,9 @@ if (command === 'demo') {
   demo.links = [{source:'aurora',target:'night-shift',shared:['TypeScript'],weight:1},{source:'tiny-compiler',target:'moss',shared:[],weight:0},{source:'aurora',target:'atlas',shared:['Markdown'],weight:1}].filter(l=>l.weight);
   await fs.mkdir('reports', { recursive: true }); await fs.writeFile('reports/demo.json', json(demo)); console.log('Created reports/demo.json');
 } else if (command === 'serve') {
-  await serve(path.resolve(flag('--report', 'reports/orbitarium.json')), flag('--port', 4317), flag('--host', '127.0.0.1'));
+  const reportFile = path.resolve(flag('--report', 'reports/orbitarium.json'));
+  await serve(reportFile, flag('--port', 4317), flag('--host', '127.0.0.1'));
+  if (flag('--watch-root', null)) await watchReport(reportFile, flag('--watch-root'), flag('--watch-interval', 30000));
 } else if (command === 'scan') {
   await writeReport(flag('--root', '.'), flag('--out', 'reports/orbitarium.json'), flag('--depth', 4));
 } else {
