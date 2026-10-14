@@ -91,15 +91,15 @@ export async function discover(root, { maxDepth = 4 } = {}) {
   return found.sort((a, b) => a.localeCompare(b));
 }
 
-export async function inspectRepository(dir, root) {
+export async function inspectRepository(dir, root, multiRoot = false) {
   const stats = { fileCount: 0, bytes: 0, languages: {} };
   await walk(dir, 0, 8, stats);
   const git = await gitInfo(dir);
   const repo = {
-    id: path.relative(root, dir).replaceAll(path.sep, '/') || path.basename(dir),
+    id: multiRoot ? dir.replaceAll(path.sep, '/') : path.relative(root, dir).replaceAll(path.sep, '/') || path.basename(dir),
     name: path.basename(dir),
     path: dir,
-    relativePath: path.relative(root, dir).replaceAll(path.sep, '/') || '.',
+    relativePath: multiRoot ? dir.replaceAll(path.sep, '/') : path.relative(root, dir).replaceAll(path.sep, '/') || '.',
     ...git,
     fileCount: stats.fileCount,
     bytes: stats.bytes,
@@ -122,8 +122,13 @@ export function buildLinks(repos) {
 }
 
 export async function createReport(root, options = {}) {
-  const resolved = path.resolve(root);
-  const dirs = await discover(resolved, options);
-  const repos = await Promise.all(dirs.map(dir => inspectRepository(dir, resolved)));
-  return { schema: 'orbitarium/v1', generatedAt: new Date().toISOString(), root: resolved, repos, links: buildLinks(repos) };
+  const roots = (Array.isArray(root) ? root : [root]).map(value => path.resolve(value));
+  const discovered = await Promise.all(roots.map(value => discover(value, options)));
+  const dirs = [...new Set(discovered.flat())].sort((a, b) => a.localeCompare(b));
+  const multiRoot = roots.length > 1;
+  const repos = await Promise.all(dirs.map(dir => {
+    const owner = roots.find(candidate => dir === candidate || dir.startsWith(candidate)) ?? roots[0];
+    return inspectRepository(dir, owner, multiRoot);
+  }));
+  return { schema: 'orbitarium/v1', generatedAt: new Date().toISOString(), root: roots.length === 1 ? roots[0] : roots, repos, links: buildLinks(repos) };
 }

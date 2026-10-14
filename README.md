@@ -22,7 +22,7 @@ node src/cli.js serve --report reports\repos.json --port 4317
 For an instrument that keeps itself current while you work, add a watch root. Orbitarium rescans it periodically and the viewer's live mode picks up the new report without a page refresh:
 
 ```powershell
-node src/cli.js serve --report reports\live.json --watch-root V:\Development\Repos --watch-interval 30000 --port 4317
+node src/cli.js serve --report reports\live.json --watch-all-drives --watch-interval 30000 --port 4317
 ```
 
 Useful flags:
@@ -33,6 +33,7 @@ Useful flags:
 * `--port <number>` server port (defaults to `4317`)
 * `--host <name>` server host (defaults to `127.0.0.1`)
 * `--watch-root <path>` rescan this root while the server runs
+* `--watch-all-drives` rescan every mounted local drive while the server runs
 * `--watch-interval <milliseconds>` live scan interval, minimum 5000ms (defaults to `30000`)
 
 ## What it measures

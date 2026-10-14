@@ -11,6 +11,15 @@ const command = args[0] ?? 'scan';
 function flag(name, fallback) { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : fallback; }
 function json(value) { return JSON.stringify(value, null, 2); }
 
+async function localDrives() {
+  const drives = [];
+  for (let code = 65; code <= 90; code++) {
+    const root = `${String.fromCharCode(code)}:\\`;
+    try { await fs.readdir(root); drives.push(root); } catch {}
+  }
+  return drives;
+}
+
 async function writeReport(root, out, depth) {
   const report = await createReport(root, { maxDepth: Number(depth) });
   await fs.mkdir(path.dirname(path.resolve(out)), { recursive: true });
@@ -41,13 +50,13 @@ async function serve(reportFile, port, host) {
   server.listen(Number(port), host, () => console.log(`Orbitarium is orbiting at http://${host}:${port}`));
 }
 
-async function watchReport(reportFile, root, interval) {
+async function watchReport(reportFile, roots, interval) {
   let busy = false;
   const refresh = async () => {
     if (busy) return;
     busy = true;
     try {
-      const report = await createReport(root);
+      const report = await createReport(roots);
       await fs.mkdir(path.dirname(reportFile), { recursive: true });
       await fs.writeFile(reportFile, json(report));
       console.log(`Orbitarium refreshed ${report.repos.length} worlds`);
@@ -71,9 +80,10 @@ if (command === 'demo') {
 } else if (command === 'serve') {
   const reportFile = path.resolve(flag('--report', 'reports/orbitarium.json'));
   await serve(reportFile, flag('--port', 4317), flag('--host', '127.0.0.1'));
-  if (flag('--watch-root', null)) await watchReport(reportFile, flag('--watch-root'), flag('--watch-interval', 30000));
+  if (args.includes('--watch-all-drives')) await watchReport(reportFile, await localDrives(), flag('--watch-interval', 30000));
+  else if (flag('--watch-root', null)) await watchReport(reportFile, flag('--watch-root'), flag('--watch-interval', 30000));
 } else if (command === 'scan') {
-  await writeReport(flag('--root', '.'), flag('--out', 'reports/orbitarium.json'), flag('--depth', 4));
+  await writeReport(args.includes('--all-drives') ? await localDrives() : flag('--root', '.'), flag('--out', 'reports/orbitarium.json'), flag('--depth', 4));
 } else {
   console.error('Usage: node src/cli.js [scan|demo|serve]'); process.exitCode = 1;
 }
