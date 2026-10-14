@@ -2,7 +2,7 @@
 
 Orbitarium is a small, local-first developer constellation. Point it at a directory and it turns the repositories underneath into an explorable map: project size becomes mass, recent activity becomes glow, shared languages become bridges, and missing documentation becomes a visible signal.
 
-It is intentionally dependency-free. The scanner uses Node's standard library; the viewer is plain HTML, CSS, and SVG. Nothing leaves your machine.
+It is intentionally dependency-free. The scanner uses Node's standard library; the viewer is plain HTML, CSS, and SVG modules. Nothing leaves your machine.
 
 ## Quick start
 
@@ -32,6 +32,18 @@ Useful flags:
 Orbitarium discovers directories containing `.git`, then records repository name, relative path, branch, commit count, latest commit date, file count, byte size, detected languages, manifests, README presence, and a health score. It does not inspect file contents beyond small, well-known manifest names and extension counts.
 
 The viewer supports search, language and health filters, click-to-inspect detail cards, keyboard navigation, a focus mode, and report export. The graph is deterministic: the same report produces the same constellation.
+
+## Developer weather station
+
+The viewer has three lenses for reading the same local report:
+
+* **Constellation** keeps the original radial map.
+* **Signal radar** pulls aging or fragile projects toward the edge of a weather radar.
+* **Orbital drift** gives each world a slow, ambient orbit.
+
+The horizon slider lets you rewind the signal forecast up to a year. Pulse mode adds a gentle heartbeat to the sky, while the inspector translates a repository's signal into weather such as radiant, clear, cloudy, stormwatch, or eclipsed. These are deliberately local interpretations of the report, not claims about your machine or your productivity.
+
+Keyboard shortcuts: `/` focuses search, `p` toggles pulse, and `f` toggles focus mode. Every star is keyboard-focusable as well as clickable.
 
 ## Development
 

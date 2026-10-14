@@ -30,7 +30,12 @@ async function serve(reportFile, port, host) {
     const file = url.pathname === '/' ? 'index.html' : url.pathname.slice(1);
     const safe = path.resolve(publicDir, file);
     if (!safe.startsWith(path.resolve(publicDir))) { res.writeHead(403); res.end('forbidden'); return; }
-    try { const data = await fs.readFile(safe); res.writeHead(200, { 'content-type': file.endsWith('.css') ? 'text/css' : 'text/html; charset=utf-8' }); res.end(data); }
+    try {
+      const data = await fs.readFile(safe);
+      const type = file.endsWith('.css') ? 'text/css; charset=utf-8' : file.endsWith('.js') ? 'text/javascript; charset=utf-8' : file.endsWith('.json') ? 'application/json; charset=utf-8' : 'text/html; charset=utf-8';
+      res.writeHead(200, { 'content-type': type });
+      res.end(data);
+    }
     catch { res.writeHead(404); res.end('not found'); }
   });
   server.listen(Number(port), host, () => console.log(`Orbitarium is orbiting at http://${host}:${port}`));

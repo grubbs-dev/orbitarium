@@ -1,6 +1,6 @@
 {
   "name": "orbitarium",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "A dependency-free developer constellation for exploring local repositories.",
