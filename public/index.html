@@ -15,6 +15,7 @@
       <label>lens <select id="mode"><option value="constellation">constellation</option><option value="radar">signal radar</option><option value="orbit">orbital drift</option></select></label>
       <button id="pulse">pulse / off</button>
       <button id="live">live / off</button>
+      <button id="mission">mission control</button>
       <button id="focus">focus mode</button>
     </div>
   </header>
@@ -22,6 +23,7 @@
     <section class="stage">
       <div class="horizon"><span>horizon</span><input id="horizon" type="range" min="0" max="365" value="0"><strong id="horizon-value">now</strong></div>
       <svg id="map" viewBox="0 0 1100 680" role="img" aria-label="Repository constellation"></svg>
+      <div id="event-feed" class="event-feed"><span class="event-dot"></span><span id="event-text">listening for signals…</span></div>
       <div class="legend"><span><i class="dot hot"></i> radiant</span><span><i class="dot warm"></i> cloudy</span><span><i class="dot cool"></i> eclipsed</span><span class="hint">click a star · / search · p pulse · f focus</span></div>
     </section>
     <aside id="inspector"></aside>

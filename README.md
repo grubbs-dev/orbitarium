@@ -50,9 +50,9 @@ The viewer has three lenses for reading the same local report:
 * **Signal radar** pulls aging or fragile projects toward the edge of a weather radar.
 * **Orbital drift** gives each world a slow, ambient orbit.
 
-The horizon slider lets you rewind the signal forecast up to a year. Pulse mode adds a gentle heartbeat to the sky, while the inspector translates a repository's signal into weather such as radiant, clear, cloudy, stormwatch, or eclipsed. These are deliberately local interpretations of the report, not claims about your machine or your productivity.
+The horizon slider lets you rewind the signal forecast up to a year. Pulse mode adds a gentle heartbeat to the sky, while the inspector translates a repository's signal into weather such as radiant, clear, cloudy, stormwatch, or eclipsed. Mission Control turns the inspector into a watch deck with an attention queue and language-mass view. The event ticker narrates bright worlds, language bridges, and quiet projects. These are deliberately local interpretations of the report, not claims about your machine or your productivity.
 
-Keyboard shortcuts: `/` focuses search, `p` toggles pulse, and `f` toggles focus mode. Every star is keyboard-focusable as well as clickable.
+Keyboard shortcuts: `/` focuses search, `p` toggles pulse, `m` opens Mission Control, and `f` toggles focus mode. Every star is keyboard-focusable as well as clickable. Turn on `live / on` to let the browser pick up new reports from a watched server.
 
 ## Development
 

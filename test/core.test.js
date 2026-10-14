@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { classifyExtension, healthScore, buildLinks } from '../src/core.js';
 import { layoutReport } from '../src/layout.js';
-import { signalAtHorizon, weatherWord, reportStats } from '../public/insights.js';
+import { attentionQueue, eventFeed, languageConstellations, signalAtHorizon, weatherWord, reportStats } from '../public/insights.js';
 
 test('classifies common source files and ignores unknown extensions', () => {
   assert.equal(classifyExtension('main.ts'), 'TypeScript');
@@ -42,4 +42,17 @@ test('report stats count bright worlds and language families', () => {
     links: [{ source: 'a', target: 'b' }]
   };
   assert.deepEqual(reportStats(report), { worlds: 2, bridges: 1, average: 59, bright: 1, languages: 2 });
+});
+
+test('mission control produces an ordered attention queue and event feed', () => {
+  const report = {
+    repos: [
+      { id:'quiet', name:'quiet', health:40, lastCommitDays:500, fileCount:10, languages:[{name:'Rust',files:4}] },
+      { id:'bright', name:'bright', health:95, lastCommitDays:1, fileCount:4, languages:[{name:'Rust',files:2},{name:'Go',files:1}] }
+    ],
+    links: [{ source:'quiet', target:'bright', shared:['Rust'], weight:1 }]
+  };
+  assert.equal(attentionQueue(report)[0].name, 'quiet');
+  assert.deepEqual(languageConstellations(report), [{ name:'Rust', files:6 }, { name:'Go', files:1 }]);
+  assert.ok(eventFeed(report).some(event => event.tone === 'bright'));
 });

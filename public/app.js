@@ -1,4 +1,4 @@
-import { reportStats, signalAtHorizon, weatherWord } from './insights.js';
+import { attentionQueue, eventFeed, languageConstellations, reportStats, signalAtHorizon, weatherWord } from './insights.js';
 
 const svg = document.querySelector('#map');
 const inspector = document.querySelector('#inspector');
@@ -9,10 +9,13 @@ const horizon = document.querySelector('#horizon');
 const horizonValue = document.querySelector('#horizon-value');
 const pulseButton = document.querySelector('#pulse');
 const liveButton = document.querySelector('#live');
+const missionButton = document.querySelector('#mission');
+const eventText = document.querySelector('#event-text');
+const eventFeedElement = document.querySelector('#event-feed');
 const summary = document.querySelector('#summary');
 const skyStatus = document.querySelector('#sky-status');
 const esc = value => String(value).replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;' }[char]));
-const state = { report: null, graph: null, selected: null, pulse: false, live: false, phase: 0, nodes: [], liveTimer: null };
+const state = { report: null, graph: null, selected: null, pulse: false, live: false, mission: false, phase: 0, nodes: [], liveTimer: null, eventTimer: null, eventIndex: 0 };
 
 function visibleRepos() {
   const query = search.value.trim().toLowerCase();
@@ -81,6 +84,23 @@ function draw() {
   summary.textContent = `${repos.length} of ${stats.worlds} worlds · ${stats.bridges} bridges · average signal ${stats.average}`;
   skyStatus.textContent = `${stats.bright} bright worlds · ${stats.languages} language families · ${weatherWord(repos[0] ?? { health: 0 }, Number(horizon.value))} horizon${state.live ? ' · live' : ''}`;
   horizonValue.textContent = Number(horizon.value) === 0 ? 'now' : `${horizon.value}d ago`;
+  updateEvent();
+}
+
+function updateEvent() {
+  const events = eventFeed(state.report, Number(horizon.value));
+  const event = events[state.eventIndex % events.length];
+  eventText.textContent = event.text;
+  eventFeedElement.dataset.tone = event.tone;
+}
+
+function renderMissionControl() {
+  const queue = attentionQueue(state.report, Number(horizon.value));
+  const languages = languageConstellations(state.report).slice(0, 5);
+  const stats = reportStats(state.report, Number(horizon.value));
+  inspector.innerHTML = `<div class="mission-card"><div class="eyebrow">orbitarium / mission control</div><h2>the watch deck</h2><p class="mission-lede">A quiet instrument panel for deciding where your attention might matter next.</p><div class="mission-metrics"><div><strong>${stats.average}</strong><span>average signal</span></div><div><strong>${stats.bright}</strong><span>bright worlds</span></div><div><strong>${stats.bridges}</strong><span>bridges</span></div></div><h3>attention queue</h3><div class="queue">${queue.slice(0, 4).map(repo => `<button class="queue-item" data-id="${esc(repo.id)}"><span class="queue-signal">${repo.signal}</span><span><b>${esc(repo.name)}</b><small>${repo.weather} · ${repo.lastCommitDays > 9000 ? 'unknown pulse' : repo.lastCommitDays + 'd since pulse'}</small></span></button>`).join('')}</div><h3>language mass</h3><div class="language-bars">${languages.map(language => `<div><span>${esc(language.name)}</span><i style="width:${Math.max(8, Math.round(language.files / Math.max(1, languages[0].files) * 100))}%"></i><b>${language.files}</b></div>`).join('')}</div><button class="clear" id="close-mission">return to sky</button></div>`;
+  document.querySelectorAll('.queue-item').forEach(item => item.onclick = () => { state.mission = false; missionButton.classList.remove('active'); select(state.report.repos.find(repo => repo.id === item.dataset.id)); });
+  document.querySelector('#close-mission').onclick = () => { state.mission = false; missionButton.classList.remove('active'); inspector.innerHTML = emptyInspector(); };
 }
 
 function select(repo) {
@@ -116,6 +136,7 @@ async function init() {
   inspector.innerHTML = emptyInspector();
   draw();
   requestAnimationFrame(animate);
+  state.eventTimer = setInterval(() => { state.eventIndex += 1; updateEvent(); }, 8000);
 }
 
 async function refreshLive() {
@@ -142,10 +163,17 @@ liveButton.onclick = () => {
   if (!state.live && state.liveTimer) { clearInterval(state.liveTimer); state.liveTimer = null; }
   draw();
 };
+missionButton.onclick = () => {
+  state.mission = !state.mission;
+  missionButton.classList.toggle('active', state.mission);
+  if (state.mission) renderMissionControl();
+  else inspector.innerHTML = emptyInspector();
+};
 document.querySelector('#focus').onclick = () => document.body.classList.toggle('focus');
 document.onkeydown = event => {
   if (event.key === '/' && document.activeElement !== search) { event.preventDefault(); search.focus(); }
   if (event.key.toLowerCase() === 'f') document.body.classList.toggle('focus');
   if (event.key.toLowerCase() === 'p') pulseButton.click();
+  if (event.key.toLowerCase() === 'm') missionButton.click();
 };
 init();
