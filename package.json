@@ -1,0 +1,15 @@
+{
+  "name": "orbitarium",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A dependency-free developer constellation for exploring local repositories.",
+  "scripts": {
+    "scan": "node src/cli.js scan",
+    "serve": "node src/cli.js serve",
+    "demo": "node src/cli.js demo",
+    "test": "node --test"
+  },
+  "engines": { "node": ">=20" },
+  "license": "MIT"
+}
