@@ -1,12 +1,19 @@
 {
   "name": "orbitarium",
   "version": "0.2.0",
-  "private": true,
+  "private": false,
   "type": "module",
-  "description": "A dependency-free developer constellation for exploring local repositories.",
+  "description": "A local-first developer observatory for exploring your repositories as a living constellation.",
+  "keywords": ["developer-tools", "local-first", "repository", "visualization", "svg", "developer-experience"],
+  "author": "Orbitarium contributors",
+  "homepage": "https://github.com/grubbs-dev/orbitarium",
+  "repository": { "type": "git", "url": "https://github.com/grubbs-dev/orbitarium.git" },
+  "bugs": { "url": "https://github.com/grubbs-dev/orbitarium/issues" },
   "scripts": {
     "scan": "node src/cli.js scan",
     "serve": "node src/cli.js serve",
+    "start": "node src/cli.js serve --report reports/orbitarium.json",
+    "check": "node --check src/cli.js && node --check src/core.js && node --check src/layout.js && node --check public/app.js && node --check public/insights.js",
     "demo": "node src/cli.js demo",
     "test": "node --test"
   },

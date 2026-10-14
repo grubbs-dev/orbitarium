@@ -1,68 +1,84 @@
-# Orbitarium
+# ✦ Orbitarium
 
-Orbitarium is a small, local-first developer constellation. Point it at a directory and it turns the repositories underneath into an explorable map: project size becomes mass, recent activity becomes glow, shared languages become bridges, and missing documentation becomes a visible signal.
+> The shape of your work.
 
-It is intentionally dependency-free. The scanner uses Node's standard library; the viewer is plain HTML, CSS, and SVG modules. Nothing leaves your machine.
+Orbitarium is a local-first developer observatory. It maps the Git repositories on your machine into a living constellation: activity becomes signal, project size becomes mass, shared languages become bridges, and missing documentation becomes visible weather.
+
+It is designed to feel like a desktop instrument, not another dashboard. Click a world to inspect it, rewind the horizon to see how its signal changes, open Mission Control for a gentle attention queue, or leave the sky moving while you work.
+
+![Orbitarium constellation preview](demo/orbitarium-preview.svg)
+
+## Why it is different
+
+- **Local by default.** Orbitarium reads repository metadata on your machine and serves the viewer to `127.0.0.1`. It has no telemetry service, account, or cloud dependency.
+- **Useful at a glance.** One screen gives you a memorable overview of activity, health, languages, documentation, and relationships.
+- **Respectfully interpretive.** “Weather” and “signal” are visual metaphors backed by documented, deterministic heuristics—not claims about your productivity or your code quality.
+- **Easy to remix.** The scanner emits plain JSON and the viewer is dependency-free HTML, CSS, SVG, and browser JavaScript.
+- **Friendly to a real desktop.** Watch one workspace or every mounted Windows drive and let the constellation refresh while you work.
 
 ## Quick start
 
+Requires Node.js 20 or newer.
+
 ```powershell
-cd V:\Development\Repos\orbitarium
+git clone https://github.com/grubbs-dev/orbitarium.git
+cd orbitarium
+npm install
 npm run demo
-npm run serve -- --report reports\demo.json --port 4317
+npm start
 ```
 
-Open http://localhost:4317. The demo command creates a tiny synthetic report so the constellation is immediately visible. For a real scan:
+Open [http://127.0.0.1:4317](http://127.0.0.1:4317). The demo is synthetic, safe, and immediate—you can explore the whole interface without giving Orbitarium access to anything outside the repository.
+
+## Map your own repositories
 
 ```powershell
-node src/cli.js scan --root V:\Development\Repos --out reports\repos.json
-node src/cli.js serve --report reports\repos.json --port 4317
+npm run scan -- --root V:\Development\Repos --out reports\repos.json
+npm run serve -- --report reports\repos.json
 ```
 
-For an instrument that keeps itself current while you work, add a watch root. Orbitarium rescans it periodically and the viewer's live mode picks up the new report without a page refresh:
+On Windows, scan every mounted local drive and keep the report fresh:
 
 ```powershell
-node src/cli.js serve --report reports\live.json --watch-all-drives --watch-interval 30000 --port 4317
+npm run serve -- --report reports\live.json --watch-all-drives --watch-interval 30000
 ```
 
-Useful flags:
+The live mode is opt-in. It only scans directories that contain a `.git` folder, skips common dependency/build directories, and writes the report to the path you choose. Reports are ignored by Git so local machine details do not accidentally enter a commit.
 
-* `--root <path>` directory to scan (defaults to the current directory)
-* `--out <path>` report destination (defaults to `reports/orbitarium.json`)
-* `--depth <number>` maximum directory depth (defaults to `4`)
-* `--port <number>` server port (defaults to `4317`)
-* `--host <name>` server host (defaults to `127.0.0.1`)
-* `--watch-root <path>` rescan this root while the server runs
-* `--watch-all-drives` rescan every mounted local drive while the server runs
-* `--watch-interval <milliseconds>` live scan interval, minimum 5000ms (defaults to `30000`)
+## Explore the sky
 
-## What it measures
+| Control | What it does |
+| --- | --- |
+| **Constellation** | The original radial map of your repositories and shared-language bridges. |
+| **Signal radar** | Pulls aging or fragile projects toward the edge of a weather radar. |
+| **Orbital drift** | Gives each world a slow, ambient orbit. |
+| **Horizon** | Rewinds the forecast up to one year. |
+| **Mission Control** | Surfaces the lowest signals and the language families connecting your work. |
+| **Live** | Reloads the report when the watched server produces a newer scan. |
+| **Focus mode** | Removes the instrument chrome for an ambient desktop view. |
 
-Orbitarium discovers directories containing `.git`, then records repository name, relative path, branch, commit count, latest commit date, file count, byte size, detected languages, manifests, README presence, and a health score. It does not inspect file contents beyond small, well-known manifest names and extension counts.
+Keyboard shortcuts: `/` search, `p` pulse, `m` Mission Control, and `f` focus mode. Stars are keyboard-focusable as well as clickable.
 
-The viewer supports search, language and health filters, click-to-inspect detail cards, keyboard navigation, a focus mode, and report export. The graph is deterministic: the same report produces the same constellation.
+## What is collected
 
-## Developer weather station
+Orbitarium records repository-level metadata: name, path relative to the selected root, current branch, commit count, latest commit age, file count, byte size, detected languages, common manifests, README presence, and a derived health score. It does not upload data, read file contents broadly, or inspect source text. The scanner only samples well-known manifest files and file extensions.
 
-The viewer has three lenses for reading the same local report:
-
-* **Constellation** keeps the original radial map.
-* **Signal radar** pulls aging or fragile projects toward the edge of a weather radar.
-* **Orbital drift** gives each world a slow, ambient orbit.
-
-The horizon slider lets you rewind the signal forecast up to a year. Pulse mode adds a gentle heartbeat to the sky, while the inspector translates a repository's signal into weather such as radiant, clear, cloudy, stormwatch, or eclipsed. Mission Control turns the inspector into a watch deck with an attention queue and language-mass view. The event ticker narrates bright worlds, language bridges, and quiet projects. These are deliberately local interpretations of the report, not claims about your machine or your productivity.
-
-Keyboard shortcuts: `/` focuses search, `p` toggles pulse, `m` opens Mission Control, and `f` toggles focus mode. Every star is keyboard-focusable as well as clickable. Turn on `live / on` to let the browser pick up new reports from a watched server.
+For commercial use, review the privacy and deployment behavior of any wrapper or host application you build around Orbitarium. The core project is intentionally local-only, but your deployment choices are your responsibility.
 
 ## Development
 
 ```powershell
 npm test
+npm run check
 node src/cli.js scan --root . --out reports\self.json
 ```
 
-The test suite covers language classification, health scoring, deterministic layout, report generation, and the static server's API.
+The project has no runtime dependencies. Tests cover language classification, health scoring, deterministic graph layout, report generation, mission-control insights, and the static server contract.
 
-## Design notes
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution workflow and [SECURITY.md](SECURITY.md) for responsible disclosure.
 
-Orbitarium is an experiment in making the “shape” of a development environment legible without turning it into another telemetry service. The report format is deliberately plain JSON so other tools can remix it.
+## License
+
+Orbitarium is released under the [MIT License](LICENSE). See the license text for the complete terms.
+
+Made for people who like seeing their tools become a place.

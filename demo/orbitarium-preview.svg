@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 620">
+  <rect width="1200" height="620" rx="24" fill="#080a19"/>
+  <g stroke="#626b9c" stroke-opacity=".42" stroke-width="2"><path d="M180 220 390 120 620 280 850 150 1030 360 720 490 390 450Z" fill="none"/><path d="M390 120 720 490M620 280 390 450M850 150 720 490"/></g>
+  <g fill="#b9ff72" stroke="#25304b" stroke-width="12"><circle cx="180" cy="220" r="45"/><circle cx="390" cy="120" r="63"/><circle cx="620" cy="280" r="52"/><circle cx="850" cy="150" r="40"/><circle cx="1030" cy="360" r="57"/><circle cx="720" cy="490" r="70"/><circle cx="390" cy="450" r="36"/></g>
+  <g fill="#080a19" font-family="ui-monospace,Consolas,monospace" font-size="18" text-anchor="middle"><text x="180" y="227">92</text><text x="390" y="127">88</text><text x="620" y="287">74</text><text x="850" y="157">96</text><text x="1030" y="367">81</text><text x="720" y="497">99</text><text x="390" y="457">68</text></g>
+  <g fill="#eeeefe" font-family="Georgia,serif" font-size="22" text-anchor="middle"><text x="390" y="214">aurora</text><text x="1030" y="440">night-shift</text><text x="720" y="578">orbitarium</text></g>
+  <text x="42" y="58" fill="#b9ff72" font-family="Georgia,serif" font-size="30">✦ orbitarium</text><text x="42" y="88" fill="#858bac" font-family="ui-monospace,Consolas,monospace" font-size="13" letter-spacing="2">THE SHAPE OF YOUR WORK</text>
+</svg>
